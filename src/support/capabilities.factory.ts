@@ -16,6 +16,12 @@ const sauceLabsAndroidCapabilities = {
   'appium:platformVersion': '13',
   'appium:deviceName': 'Android GoogleAPI Emulator',
   'appium:app': 'storage:filename=SauceLabs.apk',
+  // Without an explicit target activity, Appium infers the launcher activity
+  // (the splash screen) and polls to confirm it's focused - but this app
+  // transitions to MainActivity almost immediately, so that poll never
+  // succeeds and retries until Sauce's infra kills the stuck session.
+  'appium:appPackage': env.APP_PACKAGE,
+  'appium:appActivity': env.APP_ACTIVITY,
   'sauce:options': sauceOptions
 };
 
