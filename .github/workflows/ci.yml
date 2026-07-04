@@ -1,0 +1,51 @@
+name: Mobile CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  mobile-tests:
+    runs-on: ubuntu-latest
+    env:
+      SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+      SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+      SAUCE_REGION: ${{ secrets.SAUCE_REGION || 'us-west-1' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: Validate feature/step wiring
+        run: npm run test:ci
+
+      # Sauce Labs runs the app from its own App Storage, so the APK has to be
+      # uploaded before a session can reference it. Skipped when secrets
+      # aren't configured (e.g. forked PRs), in which case test:sauce below
+      # falls back to validation-only automatically.
+      - name: Upload Android app to Sauce Labs
+        if: ${{ env.SAUCE_USERNAME != '' && env.SAUCE_ACCESS_KEY != '' }}
+        run: |
+          curl -sf -u "$SAUCE_USERNAME:$SAUCE_ACCESS_KEY" \
+            -X POST "https://api.${SAUCE_REGION}.saucelabs.com/v1/storage/upload" \
+            -F "payload=@apps/android/SwagLabs.apk" \
+            -F "name=SauceLabs.apk"
+
+      - name: Run mobile tests on Sauce Labs
+        run: npm run test:sauce
+
+      - name: Generate Allure report
+        if: always()
+        run: npm run report:generate
+
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: reports/allure-report
+          retention-days: 30

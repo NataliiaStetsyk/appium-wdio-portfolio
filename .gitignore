@@ -4,3 +4,6 @@ reports/
 *.log
 .vscode/
 .DS_Store
+apps/ios/*.app
+apps/ios/*.app/
+apps/ios/*.ipa

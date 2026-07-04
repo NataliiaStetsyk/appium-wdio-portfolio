@@ -1,6 +1,6 @@
-import { BasePage } from './base.page.js';
+import { BasePage } from './base.page';
 
-class LoginPage extends BasePage {
+export class LoginPage extends BasePage {
   get usernameInput() {
     return $('~test-Username');
   }

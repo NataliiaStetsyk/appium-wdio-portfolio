@@ -1,27 +1,64 @@
-import { env } from './config.js';
+import { resolve } from 'node:path';
+import { env, isIos, SAUCE_BUILD_NAME } from './config';
+import { isFallbackMode } from './fallback';
 
-const androidCapabilities = {
+const sauceOptions = {
+  build: SAUCE_BUILD_NAME,
+  name: 'login-flow',
+  appiumVersion: '2.0.0',
+  username: process.env.SAUCE_USERNAME,
+  accessKey: process.env.SAUCE_ACCESS_KEY
+};
+
+const sauceLabsAndroidCapabilities = {
   platformName: 'Android',
-  automationName: env.AUTOMATION_NAME,
-  platformVersion: env.PLATFORM_VERSION,
-  deviceName: env.DEVICE_NAME,
-  app: env.APP_PATH,
-  appPackage: env.APP_PACKAGE,
-  appActivity: env.APP_ACTIVITY,
-  noReset: true,
-  newCommandTimeout: 240
+  'appium:automationName': 'UiAutomator2',
+  'appium:platformVersion': '13',
+  'appium:deviceName': 'Android GoogleAPI Emulator',
+  'appium:app': 'storage:filename=SauceLabs.apk',
+  'sauce:options': sauceOptions
 };
 
-const iOSCapabilities = {
+const sauceLabsIosCapabilities = {
   platformName: 'iOS',
-  automationName: 'XCUITest',
-  platformVersion: env.PLATFORM_VERSION,
-  deviceName: env.DEVICE_NAME,
-  app: env.APP_PATH,
-  noReset: true,
-  newCommandTimeout: 240
+  'appium:automationName': 'XCUITest',
+  'appium:platformVersion': '17',
+  'appium:deviceName': 'iPhone 15 Simulator',
+  'appium:app': 'storage:filename=SauceLabs.ipa',
+  'sauce:options': sauceOptions
 };
 
-export const mobileCapabilities = env.PLATFORM_NAME.toLowerCase() === 'ios'
-  ? [iOSCapabilities]
-  : [androidCapabilities];
+const localAndroidCapabilities = {
+  platformName: env.PLATFORM_NAME,
+  'appium:automationName': env.AUTOMATION_NAME,
+  'appium:platformVersion': env.PLATFORM_VERSION,
+  'appium:deviceName': env.DEVICE_NAME,
+  'appium:app': resolve(env.APP_PATH),
+  'appium:appPackage': env.APP_PACKAGE,
+  'appium:appActivity': env.APP_ACTIVITY,
+  'appium:noReset': false
+};
+
+const localIosCapabilities = {
+  platformName: env.PLATFORM_NAME,
+  'appium:automationName': env.AUTOMATION_NAME,
+  'appium:platformVersion': env.PLATFORM_VERSION,
+  'appium:deviceName': env.DEVICE_NAME,
+  'appium:app': resolve(env.APP_PATH),
+  'appium:noReset': false,
+  ...(env.BUNDLE_ID ? { 'appium:bundleId': env.BUNDLE_ID } : {}),
+  ...(env.UDID ? { 'appium:udid': env.UDID } : {})
+};
+
+const useSauceLabs = Boolean(process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY);
+
+export const mobileCapabilities = useSauceLabs
+  ? [isIos ? sauceLabsIosCapabilities : sauceLabsAndroidCapabilities]
+  : isFallbackMode
+    ? []
+    : [isIos ? localIosCapabilities : localAndroidCapabilities];
+
+// The single source of truth for "is there a real target to drive": true
+// whenever mobileCapabilities is empty, which only happens when Sauce Labs
+// isn't configured AND no local device/simulator is available either.
+export const isDryRun = mobileCapabilities.length === 0;

@@ -1,15 +1,20 @@
+import type { ChainablePromiseElement } from 'webdriverio';
+import { TIMEOUTS } from '../support/config';
+
 export abstract class BasePage {
-  protected async waitForDisplayed(element: WebdriverIO.Element) {
-    await element.waitForDisplayed({ timeout: 10000 });
+  protected async waitForDisplayed(element: ChainablePromiseElement, timeout = TIMEOUTS.displayedMs) {
+    await element.waitForDisplayed({ timeout });
+    return element;
   }
 
-  protected async tap(element: WebdriverIO.Element) {
-    await this.waitForDisplayed(element);
-    await element.click();
+  protected async tap(element: ChainablePromiseElement, timeout = TIMEOUTS.displayedMs) {
+    const target = await this.waitForDisplayed(element, timeout);
+    await target.click();
   }
 
-  protected async typeText(element: WebdriverIO.Element, text: string) {
-    await this.waitForDisplayed(element);
-    await element.setValue(text);
+  protected async typeText(element: ChainablePromiseElement, text: string, timeout = TIMEOUTS.displayedMs) {
+    const target = await this.waitForDisplayed(element, timeout);
+    await target.clearValue();
+    await target.setValue(text);
   }
 }

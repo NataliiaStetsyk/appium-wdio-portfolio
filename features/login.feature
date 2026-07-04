@@ -5,5 +5,5 @@ Feature: Mobile application login
 
   Scenario: Successful login with valid credentials
     Given the mobile app is open
-    When the user logs in with username "standard_user" and password "secret_sauce"
+    When the user logs in as "standardUser"
     Then the product catalog is displayed

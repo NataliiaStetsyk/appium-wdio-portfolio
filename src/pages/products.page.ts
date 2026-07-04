@@ -1,6 +1,6 @@
-import { BasePage } from './base.page.js';
+import { BasePage } from './base.page';
 
-class ProductsPage extends BasePage {
+export class ProductsPage extends BasePage {
   get headerTitle() {
     return $('~test-PRODUCTS');
   }

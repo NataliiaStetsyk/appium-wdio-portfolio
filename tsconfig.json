@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext",
+    "module": "CommonJS",
     "moduleResolution": "Node",
     "lib": ["ES2022", "DOM"],
     "strict": true,
@@ -9,11 +9,8 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "types": ["node", "@wdio/globals/types", "@wdio/cucumber-framework"],
-    "baseUrl": ".",
-    "paths": {
-      "@src/*": ["src/*"]
-    }
+    "allowImportingTsExtensions": true,
+    "types": ["node", "@wdio/globals/types", "@wdio/cucumber-framework"]
   },
-  "include": ["src/**/*.ts", "wdio.conf.ts", "features/**/*.ts"]
+  "include": ["src/**/*.ts", "features/**/*.ts"]
 }
