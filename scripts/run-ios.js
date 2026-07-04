@@ -21,8 +21,7 @@ runDeviceSession({
   hasPlatformSdk: hasIosSdk,
   missingSdkMessage: process.platform !== 'darwin'
     ? 'iOS Simulator automation requires macOS.'
-    : 'Missing iOS Simulator toolchain: install full Xcode from the App Store (Command Line Tools alone are not enough) and run "xcodebuild -runFirstLaunch".',
-  forceRealDeviceEnvVar: 'UDID'
+    : 'Missing iOS Simulator toolchain: install full Xcode from the App Store (Command Line Tools alone are not enough) and run "xcodebuild -runFirstLaunch".'
 }).catch((error) => {
   console.error(error.message);
   process.exit(1);

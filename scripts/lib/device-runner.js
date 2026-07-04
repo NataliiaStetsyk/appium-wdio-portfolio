@@ -91,8 +91,7 @@ async function runDeviceSession({
   envPrefix,
   appiumExtraArgs = [],
   hasPlatformSdk,
-  missingSdkMessage,
-  forceRealDeviceEnvVar
+  missingSdkMessage
 }) {
   process.env.PLATFORM_NAME = platformName;
   for (const key of ['APP_PATH', 'DEVICE_NAME', 'PLATFORM_VERSION', 'AUTOMATION_NAME']) {
@@ -108,7 +107,10 @@ async function runDeviceSession({
   const appPath = resolve(projectRoot, env.APP_PATH);
   const hasAppBinary = existsSync(appPath);
   const hasSauceCredentials = Boolean(process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY);
-  const forceRealDevice = process.env.WDIO_FORCE_REAL_DEVICE === 'true' || Boolean(process.env[forceRealDeviceEnvVar]);
+  // Deliberately not inferred from ANDROID_HOME/UDID: hosted CI runners can
+  // preinstall SDK tooling without an actual emulator/simulator running, so
+  // only an explicit opt-in should force a real-device attempt.
+  const forceRealDevice = process.env.WDIO_FORCE_REAL_DEVICE === 'true';
   const canRunDeviceSession = hasSauceCredentials || forceRealDevice || (hasAppBinary && hasPlatformSdk);
   const appiumPort = Number(env.APPIUM_PORT);
   const appiumAddress = env.APPIUM_HOST;

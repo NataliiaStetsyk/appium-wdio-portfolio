@@ -22,9 +22,11 @@ function hasIosSimulatorToolchain(): boolean {
 const hasIosSdk = hasIosSimulatorToolchain();
 const hasPlatformSdk = isIos ? hasIosSdk : hasAndroidSdk;
 const forcedFallback = process.env.WDIO_FALLBACK_MODE === 'true' || process.env.CI === 'true';
-const forcedRealDevice =
-  process.env.WDIO_FORCE_REAL_DEVICE === 'true' ||
-  (isIos ? Boolean(process.env.UDID) : Boolean(process.env.ANDROID_HOME));
+// Deliberately does NOT infer "real device" from ANDROID_HOME/UDID being set:
+// hosted CI runners (e.g. GitHub's ubuntu-latest) preinstall the Android SDK
+// and set ANDROID_HOME regardless of whether an emulator is actually running,
+// which would otherwise falsely defeat forcedFallback. Only an explicit opt-in counts.
+const forcedRealDevice = process.env.WDIO_FORCE_REAL_DEVICE === 'true';
 
 export const isFallbackMode = !forcedRealDevice && (forcedFallback || !hasAppBinary || !hasPlatformSdk);
 

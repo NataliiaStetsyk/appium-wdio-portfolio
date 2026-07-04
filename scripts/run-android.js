@@ -7,8 +7,7 @@ runDeviceSession({
   envPrefix: 'ANDROID',
   appiumExtraArgs: ['--allow-insecure', 'chromedriver_autodownload'],
   hasPlatformSdk: hasAndroidSdk,
-  missingSdkMessage: 'Missing Android SDK: set ANDROID_HOME or ANDROID_SDK_ROOT for a real Appium run.',
-  forceRealDeviceEnvVar: 'ANDROID_HOME'
+  missingSdkMessage: 'Missing Android SDK: set ANDROID_HOME or ANDROID_SDK_ROOT for a real Appium run.'
 }).catch((error) => {
   console.error(error.message);
   process.exit(1);
