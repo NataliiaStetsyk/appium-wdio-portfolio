@@ -102,14 +102,29 @@ npm run test:sauce
 ```
 
 Set `SAUCE_USERNAME` and `SAUCE_ACCESS_KEY` (and optionally `SAUCE_REGION`,
-default `us-west-1`) in `.env` first. The Android capability expects the app
-already uploaded to Sauce's App Storage as `SauceLabs.apk`:
+default `us-west-1`) in `.env` first, and set `PLATFORM_NAME` to `Android` or
+`iOS` depending on which one you want to run.
+
+The Android capability expects the app already uploaded to Sauce's App
+Storage as `SauceLabs.apk`:
 
 ```bash
 curl -u "$SAUCE_USERNAME:$SAUCE_ACCESS_KEY" \
   -X POST "https://api.${SAUCE_REGION:-us-west-1}.saucelabs.com/v1/storage/upload" \
   -F "payload=@apps/android/SwagLabs.apk" \
   -F "name=SauceLabs.apk"
+```
+
+The iOS capability targets Sauce's iOS **Simulator** cloud (not a real
+device), which — unlike a real device — doesn't require code signing, so it
+can run the same `.app` Simulator build validated locally. Upload it as a zip
+(Sauce unzips and installs it) under the name `SauceLabs.app.zip`:
+
+```bash
+curl -u "$SAUCE_USERNAME:$SAUCE_ACCESS_KEY" \
+  -X POST "https://api.${SAUCE_REGION:-us-west-1}.saucelabs.com/v1/storage/upload" \
+  -F "payload=@/path/to/iOS.Simulator.SauceLabs.Mobile.Sample.app.2.7.1.zip" \
+  -F "name=SauceLabs.app.zip"
 ```
 
 Without credentials configured, `test:sauce` automatically falls back to
@@ -139,9 +154,10 @@ npm run report:open      # just open the last generated report
 `main` and every pull request:
 
 1. `npm run test:ci` — fast feature/step/TypeScript validation, no device or credentials needed.
-2. Uploads `apps/android/SwagLabs.apk` to Sauce Labs App Storage (only if Sauce secrets are configured).
-3. `npm run test:sauce` — runs the real login flow against a Sauce Labs Android device, or falls back to validation if secrets aren't set (e.g. on a fork's pull request).
-4. Generates the Allure report and uploads it as a workflow artifact (even if the run failed), viewable from the Actions run summary.
+2. Uploads `apps/android/SwagLabs.apk` to Sauce Labs App Storage, then runs `test:sauce` against a real Sauce Labs Android device.
+3. Downloads the same iOS Simulator build validated locally (pinned to the 2.7.1 release), uploads it to Sauce Labs App Storage, then runs `test:sauce` (with `PLATFORM_NAME=iOS`) against Sauce's iOS Simulator cloud — no macOS runner or code signing needed, since Sauce runs the Simulator itself.
+4. Both Sauce steps fall back to validation instead of failing when secrets aren't set (e.g. on a fork's pull request); the iOS step runs regardless of whether the Android step passed, so both platforms are always attempted independently.
+5. Generates the Allure report (covering both platforms) and uploads it as a workflow artifact (even if a run failed), viewable from the Actions run summary.
 
 To enable the real Sauce Labs run, add these as repository secrets
 (Settings → Secrets and variables → Actions):

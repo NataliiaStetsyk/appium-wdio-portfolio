@@ -30,7 +30,10 @@ const sauceLabsIosCapabilities = {
   'appium:automationName': 'XCUITest',
   'appium:platformVersion': '17',
   'appium:deviceName': 'iPhone 15 Simulator',
-  'appium:app': 'storage:filename=SauceLabs.ipa',
+  // Simulator .app bundles are uploaded to Sauce Storage as a zip (Sauce
+  // unzips and installs it); real-device .ipa builds would use a bare
+  // "storage:filename=....ipa" reference instead.
+  'appium:app': 'storage:filename=SauceLabs.app.zip',
   'sauce:options': sauceOptions
 };
 

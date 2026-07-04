@@ -35,7 +35,30 @@ jobs:
             -F "payload=@apps/android/SwagLabs.apk" \
             -F "name=SauceLabs.apk"
 
-      - name: Run mobile tests on Sauce Labs
+      - name: Run mobile tests on Sauce Labs (Android)
+        run: npm run test:sauce
+
+      # Simulator .app builds don't need code signing (unlike real devices),
+      # so Sauce's iOS Simulator cloud can run the exact same build validated
+      # locally. Pinned to the same 2.7.1 release used in apps/ios/README.md.
+      - name: Download iOS Simulator app
+        if: ${{ env.SAUCE_USERNAME != '' && env.SAUCE_ACCESS_KEY != '' }}
+        run: |
+          curl -sfL "https://github.com/saucelabs/sample-app-mobile/releases/download/2.7.1/iOS.Simulator.SauceLabs.Mobile.Sample.app.2.7.1.zip" \
+            -o /tmp/SwagLabs.app.zip
+
+      - name: Upload iOS app to Sauce Labs
+        if: ${{ env.SAUCE_USERNAME != '' && env.SAUCE_ACCESS_KEY != '' }}
+        run: |
+          curl -sf -u "$SAUCE_USERNAME:$SAUCE_ACCESS_KEY" \
+            -X POST "https://api.${SAUCE_REGION}.saucelabs.com/v1/storage/upload" \
+            -F "payload=@/tmp/SwagLabs.app.zip" \
+            -F "name=SauceLabs.app.zip"
+
+      - name: Run mobile tests on Sauce Labs (iOS)
+        if: always()
+        env:
+          PLATFORM_NAME: iOS
         run: npm run test:sauce
 
       - name: Generate Allure report
