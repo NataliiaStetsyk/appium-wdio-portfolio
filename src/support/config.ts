@@ -20,7 +20,10 @@ export const env = {
 } as const;
 
 export const TIMEOUTS = {
-  displayedMs: 10000
+  // Generous enough for a cold app launch on a freshly-provisioned Sauce Labs
+  // cloud device (slower JS-bundle load than a warm local emulator); this is
+  // a polling wait, so it doesn't slow down runs where the element appears sooner.
+  displayedMs: 25000
 } as const;
 
 export const SAUCE_BUILD_NAME = 'appium-wdio-portfolio';
